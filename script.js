@@ -1,70 +1,83 @@
+// Elementos base para animaciones y estado de UI
 const progressBar = document.getElementById('scrollBar');
-const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-let reducedMotion = reducedMotionQuery.matches;
 const revealItems = document.querySelectorAll('.reveal');
 const parallaxItems = document.querySelectorAll('.parallax');
-const videos = document.querySelectorAll('video');
-const videoPlayButtons = document.querySelectorAll('[data-video-index]');
+const videoButtons = document.querySelectorAll('[data-video-index]');
+const videos = document.querySelectorAll('.video-frame video');
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-reducedMotionQuery.addEventListener('change', () => {
-  window.location.reload();
-});
-
+// Actualiza la barra de progreso al hacer scroll
 const updateScrollProgress = () => {
   if (!progressBar) return;
-  const max = document.documentElement.scrollHeight - window.innerHeight;
-  const scrolled = max > 0 ? (window.scrollY / max) * 100 : 0;
-  progressBar.style.width = `${Math.min(scrolled, 100)}%`;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const percentage = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0;
+  progressBar.style.width = `${Math.min(percentage, 100)}%`;
 };
 
-if (!reducedMotion) {
+// Muestra secciones con efecto suave al entrar en viewport
+const initReveal = () => {
+  if (reducedMotionQuery.matches) {
+    revealItems.forEach(item => item.classList.add('is-visible'));
+    return;
+  }
+
   const observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('is-visible');
       });
     },
-    { threshold: 0.2 }
+    { threshold: 0.18 }
   );
 
   revealItems.forEach(item => observer.observe(item));
+};
 
-  const handleParallax = () => {
-    const scrollY = window.scrollY;
+// Parallax leve para cadenas decorativas
+const initParallax = () => {
+  if (reducedMotionQuery.matches) return;
+
+  const applyParallax = () => {
+    const currentY = window.scrollY;
     parallaxItems.forEach(item => {
-      const speed = parseFloat(item.dataset.speed || '0.1');
-      if (item.classList.contains('chain')) {
-        item.style.setProperty('--parallax-y', `${scrollY * speed}px`);
-      } else {
-        item.style.transform = `translateY(${scrollY * speed}px)`;
-      }
+      const speed = parseFloat(item.dataset.speed || '0.08');
+      item.style.setProperty('--parallax-y', `${currentY * speed}px`);
     });
   };
 
-  window.addEventListener('scroll', handleParallax, { passive: true });
-} else {
-  revealItems.forEach(item => item.classList.add('is-visible'));
-}
+  window.addEventListener('scroll', applyParallax, { passive: true });
+  applyParallax();
+};
 
-videoPlayButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    const index = Number(button.dataset.videoIndex);
-    if (!Number.isInteger(index) || index < 0 || index >= videos.length) return;
-    const currentVideo = videos[index];
-    if (!currentVideo) return;
+// Controla reproducción/pausa de videos de muestra
+const initVideoButtons = () => {
+  videoButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const index = Number(button.dataset.videoIndex);
+      if (!Number.isInteger(index) || index < 0 || index >= videos.length) return;
 
-    if (currentVideo.paused) {
-      currentVideo.play();
-      button.textContent = '❚❚';
-    } else {
-      currentVideo.pause();
-      button.textContent = '▶';
-    }
+      const currentVideo = videos[index];
+      if (currentVideo.paused) {
+        currentVideo.play();
+        button.textContent = '❚❚';
+      } else {
+        currentVideo.pause();
+        button.textContent = '▶';
+      }
+    });
   });
-});
+};
+
+// Inicialización general
+initReveal();
+initParallax();
+initVideoButtons();
+updateScrollProgress();
 
 window.addEventListener('scroll', updateScrollProgress, { passive: true });
 window.addEventListener('resize', updateScrollProgress);
-updateScrollProgress();
+
+// Respeta cambios de accesibilidad (reduced motion)
+reducedMotionQuery.addEventListener('change', () => {
+  window.location.reload();
+});
