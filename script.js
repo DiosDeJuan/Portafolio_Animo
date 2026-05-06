@@ -28,8 +28,12 @@ if (!reducedMotion) {
   const handleParallax = () => {
     const scrollY = window.scrollY;
     parallaxItems.forEach(item => {
-      const speed = Number(item.dataset.speed || 0.1);
-      item.style.transform = `translateY(${scrollY * speed}px)`;
+      const speed = parseFloat(item.dataset.speed || '0.1');
+      if (item.classList.contains('chain')) {
+        item.style.setProperty('--parallax-y', `${scrollY * speed}px`);
+      } else {
+        item.style.transform = `translateY(${scrollY * speed}px)`;
+      }
     });
   };
 

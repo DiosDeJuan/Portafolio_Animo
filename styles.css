@@ -144,24 +144,25 @@ main {
   pointer-events: none;
   mix-blend-mode: screen;
   opacity: 0.62;
+  --parallax-y: 0px;
 }
 .chain-top {
   width: min(44vw, 230px);
   right: -2.5rem;
   top: 8.3rem;
-  transform: rotate(28deg);
+  transform: translateY(var(--parallax-y)) rotate(28deg);
 }
 .chain-side {
   width: min(47vw, 250px);
   right: -3.4rem;
   top: 20%;
-  transform: rotate(-12deg);
+  transform: translateY(var(--parallax-y)) rotate(-12deg);
 }
 .chain-corner {
   width: min(52vw, 270px);
   right: -4.5rem;
   top: -2rem;
-  transform: rotate(24deg);
+  transform: translateY(var(--parallax-y)) rotate(24deg);
 }
 
 .stats-grid,
@@ -172,7 +173,7 @@ main {
   display: grid;
   gap: 0.8rem;
 }
-.stats-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); margin-top: 0.6rem; }
+.stats-grid { grid-template-columns: minmax(0, 1fr); margin-top: 0.6rem; }
 .stat-card {
   border: 1px solid rgba(217, 217, 217, 0.42);
   border-radius: var(--radius);
@@ -399,6 +400,7 @@ main {
 .reveal.is-visible .stagger:nth-child(6) { animation-delay: 320ms; }
 
 @keyframes rise {
+  from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
