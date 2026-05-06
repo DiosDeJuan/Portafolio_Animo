@@ -1,0 +1,59 @@
+const progressBar = document.getElementById('scrollBar');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const revealItems = document.querySelectorAll('.reveal');
+const parallaxItems = document.querySelectorAll('.parallax');
+const videos = document.querySelectorAll('video');
+const videoPlayButtons = document.querySelectorAll('[data-video-index]');
+
+const updateScrollProgress = () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = max > 0 ? (window.scrollY / max) * 100 : 0;
+  progressBar.style.width = `${Math.min(scrolled, 100)}%`;
+};
+
+if (!reducedMotion) {
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    },
+    { threshold: 0.2 }
+  );
+
+  revealItems.forEach(item => observer.observe(item));
+
+  const handleParallax = () => {
+    const scrollY = window.scrollY;
+    parallaxItems.forEach(item => {
+      const speed = Number(item.dataset.speed || 0.1);
+      item.style.transform = `translateY(${scrollY * speed}px)`;
+    });
+  };
+
+  window.addEventListener('scroll', handleParallax, { passive: true });
+} else {
+  revealItems.forEach(item => item.classList.add('is-visible'));
+}
+
+videoPlayButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const index = Number(button.dataset.videoIndex);
+    const currentVideo = videos[index];
+    if (!currentVideo) return;
+
+    if (currentVideo.paused) {
+      currentVideo.play();
+      button.textContent = '❚❚';
+    } else {
+      currentVideo.pause();
+      button.textContent = '▶';
+    }
+  });
+});
+
+window.addEventListener('scroll', updateScrollProgress, { passive: true });
+window.addEventListener('resize', updateScrollProgress);
+updateScrollProgress();
