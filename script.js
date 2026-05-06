@@ -74,6 +74,7 @@ const initVideoButtons = () => {
       if (!Number.isInteger(index) || index < 0 || index >= videos.length) return;
 
       const currentVideo = videos[index];
+      if (!currentVideo) return;
       if (currentVideo.paused) {
         currentVideo.play();
         button.textContent = '❚❚';

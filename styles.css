@@ -27,6 +27,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
+  overflow-x: hidden;
   overflow-x: clip;
 }
 
@@ -290,7 +291,7 @@ main {
   gap: 0.85rem;
   overflow-x: auto;
   padding-bottom: 0.3rem;
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
 }
 
 .video-card {
