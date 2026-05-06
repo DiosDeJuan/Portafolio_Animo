@@ -45,6 +45,7 @@ if (!reducedMotion) {
 videoPlayButtons.forEach(button => {
   button.addEventListener('click', () => {
     const index = Number(button.dataset.videoIndex);
+    if (!Number.isInteger(index) || index < 0) return;
     const currentVideo = videos[index];
     if (!currentVideo) return;
 
