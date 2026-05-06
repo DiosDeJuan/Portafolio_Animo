@@ -6,6 +6,7 @@ const videos = document.querySelectorAll('video');
 const videoPlayButtons = document.querySelectorAll('[data-video-index]');
 
 const updateScrollProgress = () => {
+  if (!progressBar) return;
   const max = document.documentElement.scrollHeight - window.innerHeight;
   const scrolled = max > 0 ? (window.scrollY / max) * 100 : 0;
   progressBar.style.width = `${Math.min(scrolled, 100)}%`;
@@ -45,7 +46,7 @@ if (!reducedMotion) {
 videoPlayButtons.forEach(button => {
   button.addEventListener('click', () => {
     const index = Number(button.dataset.videoIndex);
-    if (!Number.isInteger(index) || index < 0) return;
+    if (!Number.isInteger(index) || index < 0 || index >= videos.length) return;
     const currentVideo = videos[index];
     if (!currentVideo) return;
 
