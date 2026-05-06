@@ -6,6 +6,10 @@ const videoButtons = document.querySelectorAll('[data-video-index]');
 const videos = document.querySelectorAll('.video-frame video');
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+let reducedMotion = reducedMotionQuery.matches;
+let revealObserver = null;
+let parallaxAttached = false;
+
 // Actualiza la barra de progreso al hacer scroll
 const updateScrollProgress = () => {
   if (!progressBar) return;
@@ -16,12 +20,18 @@ const updateScrollProgress = () => {
 
 // Muestra secciones con efecto suave al entrar en viewport
 const initReveal = () => {
-  if (reducedMotionQuery.matches) {
+  if (revealObserver) {
+    revealItems.forEach(item => revealObserver.unobserve(item));
+    revealObserver.disconnect();
+    revealObserver = null;
+  }
+
+  if (reducedMotion) {
     revealItems.forEach(item => item.classList.add('is-visible'));
     return;
   }
 
-  const observer = new IntersectionObserver(
+  revealObserver = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) entry.target.classList.add('is-visible');
@@ -30,22 +40,29 @@ const initReveal = () => {
     { threshold: 0.18 }
   );
 
-  revealItems.forEach(item => observer.observe(item));
+  revealItems.forEach(item => revealObserver.observe(item));
 };
 
 // Parallax leve para cadenas decorativas
+const applyParallax = () => {
+  const currentY = window.scrollY;
+  parallaxItems.forEach(item => {
+    const speed = parseFloat(item.dataset.speed || '0.08');
+    item.style.setProperty('--parallax-y', `${currentY * speed}px`);
+  });
+};
+
 const initParallax = () => {
-  if (reducedMotionQuery.matches) return;
+  if (!parallaxAttached) {
+    window.addEventListener('scroll', applyParallax, { passive: true });
+    parallaxAttached = true;
+  }
 
-  const applyParallax = () => {
-    const currentY = window.scrollY;
-    parallaxItems.forEach(item => {
-      const speed = parseFloat(item.dataset.speed || '0.08');
-      item.style.setProperty('--parallax-y', `${currentY * speed}px`);
-    });
-  };
+  if (reducedMotion) {
+    parallaxItems.forEach(item => item.style.setProperty('--parallax-y', '0px'));
+    return;
+  }
 
-  window.addEventListener('scroll', applyParallax, { passive: true });
   applyParallax();
 };
 
@@ -77,7 +94,9 @@ updateScrollProgress();
 window.addEventListener('scroll', updateScrollProgress, { passive: true });
 window.addEventListener('resize', updateScrollProgress);
 
-// Respeta cambios de accesibilidad (reduced motion)
-reducedMotionQuery.addEventListener('change', () => {
-  window.location.reload();
+// Respeta cambios de accesibilidad (reduced motion) sin recargar la página
+reducedMotionQuery.addEventListener('change', event => {
+  reducedMotion = event.matches;
+  initReveal();
+  initParallax();
 });
