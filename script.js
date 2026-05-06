@@ -1,9 +1,14 @@
 const progressBar = document.getElementById('scrollBar');
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+let reducedMotion = reducedMotionQuery.matches;
 const revealItems = document.querySelectorAll('.reveal');
 const parallaxItems = document.querySelectorAll('.parallax');
 const videos = document.querySelectorAll('video');
 const videoPlayButtons = document.querySelectorAll('[data-video-index]');
+
+reducedMotionQuery.addEventListener('change', () => {
+  window.location.reload();
+});
 
 const updateScrollProgress = () => {
   if (!progressBar) return;
