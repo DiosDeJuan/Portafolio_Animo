@@ -28,7 +28,13 @@ body {
   color: var(--text);
   font-family: var(--sans);
   overflow-x: hidden;
-  overflow-x: clip;
+}
+
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
 }
 
 img,
